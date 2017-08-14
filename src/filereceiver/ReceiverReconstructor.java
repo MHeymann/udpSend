@@ -1,18 +1,29 @@
 package filereceiver;
 
-import java.net.*;
-import java.nio.channels.*;
-import java.nio.*;
-import java.io.FileOutputStream;
-import java.util.*;
-import java.io.IOException;
 import javax.swing.JOptionPane;
-/*
-import java.lang.System;
-*/
 
-import packet.*;
-import parameters.*;
+import java.net.InetSocketAddress;
+import java.net.DatagramSocket;
+import java.net.ServerSocket;
+
+import java.nio.channels.SocketChannel;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.DatagramChannel;
+import java.nio.channels.Selector;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.FileChannel;
+import java.nio.ByteBuffer;
+
+import java.util.PriorityQueue;
+import java.util.Set;
+import java.util.Iterator;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.FileNotFoundException;
+
+import packet.Packet;
+import parameters.Parameters;
 
 public class ReceiverReconstructor implements Runnable {
 	private Receiver receiver = null;
@@ -67,6 +78,7 @@ public class ReceiverReconstructor implements Runnable {
 		this.pq = new PriorityQueue<Packet>();
 	}
 
+	/*
 	public void run() {
 		try {
 			go();
@@ -75,20 +87,29 @@ public class ReceiverReconstructor implements Runnable {
 			e.printStackTrace();
 		}
 	}
+	*/
 
-	public void go() throws Exception
+	/**
+	 * Method that drives thread associated with this structure.
+	 */
+	public void run()
 	{
 		SelectionKey key = null;
 		Set<SelectionKey> selectedKeys = null;
 		Iterator<SelectionKey> it = null;
 		DatagramChannel dChannel = null;
 		ByteBuffer buffer = ByteBuffer.allocate(Parameters.BUFFER_SIZE);
-		int n;
+		int n = -1;
 		boolean pingback = false;
 		boolean receiving = false;
 
 		while (true) {
-			n = selector.select(4);
+			try {
+				n = selector.select(4);
+			} catch (IOException e) {
+				System.err.printf("error selecting input from selector");
+				e.printStackTrace();
+			}
 			if (n == 0) {
 				if (pingback) {
 					this.pingBack();
@@ -111,19 +132,19 @@ public class ReceiverReconstructor implements Runnable {
 					serverSocketChannel = (ServerSocketChannel)key.channel();
 
 					sChannel = null;
-					sChannel = serverSocketChannel.accept();
-					sChannel.configureBlocking(false);
-					sChannel.register(selector, SelectionKey.OP_READ);
+					try {
+						sChannel = serverSocketChannel.accept();
+						sChannel.configureBlocking(false);
+						sChannel.register(selector, SelectionKey.OP_READ);
+					} catch (IOException e) {
+						System.err.printf("Error accepting new channel.\n");
+						e.printStackTrace();
+					}
 					
 					this.receiver.appendTCP("New TCP connection from " + sChannel.toString() + "\n");
-
-
 					
-					//xxxx
 					receiving = true;
 
-
-					//yyyy
 					try {
 						this.filePath = (String)JOptionPane.showInputDialog(
 							receiver,
@@ -147,13 +168,24 @@ public class ReceiverReconstructor implements Runnable {
 					}
 
 					buffer.clear();
-					int r = this.sChannel.read(buffer);
+					int r = -1;
+					try {
+						r = this.sChannel.read(buffer);
+					} catch (IOException e) {
+						System.out.printf("Error reading from socketChannel\n");
+						e.printStackTrace();
+					}
 					System.out.printf("%d bytes read\n", r);
 					if (r == -1) {
 						String tcpmessage = "TCP connection broke down!\n";
 						this.receiver.appendTCP(tcpmessage);
 						System.out.printf("%s", tcpmessage);
-						this.sChannel.close();
+						try {
+							this.sChannel.close();
+						} catch (IOException e) {
+							System.out.printf("Could not close sChannel\n");
+							e.printStackTrace();
+						}
 						System.exit(1);
 					} else {
 						buffer.flip();
@@ -162,13 +194,24 @@ public class ReceiverReconstructor implements Runnable {
 						this.receiver.appendTCP(tcpmessage);
 						System.out.printf("%s", tcpmessage);
 						buffer.rewind();
-						sChannel.write(buffer);
+						try {
+							sChannel.write(buffer);
+						} catch (IOException e) {
+							System.out.printf("Could not write to sChannel\n");
+							e.printStackTrace();
+						}
 						buffer.clear();
 					}
 
 					this.startTime = System.currentTimeMillis();
 
-					FileOutputStream fout = new FileOutputStream(this.filePath);
+					FileOutputStream fout = null;
+					try {
+						fout = new FileOutputStream(this.filePath);
+					} catch (FileNotFoundException e) {
+						System.out.printf("File not found\n");
+						e.printStackTrace();
+					}
 					this.fcout = fout.getChannel();
 					it.remove();
 				} else if ((key.readyOps() & SelectionKey.OP_READ)
@@ -177,7 +220,12 @@ public class ReceiverReconstructor implements Runnable {
 					if (key.channel() instanceof DatagramChannel) {
 						dChannel = (DatagramChannel)key.channel();
 						buffer.clear();
-						dChannel.receive(buffer);
+						try {
+							dChannel.receive(buffer);
+						} catch (IOException e) {
+							System.err.printf("Could not receive to buffer\n");
+							e.printStackTrace();
+						}
 						buffer.flip();
 						int seqNo = buffer.getInt();
 						int size = buffer.getInt();
@@ -197,12 +245,21 @@ public class ReceiverReconstructor implements Runnable {
 					} else if (key.channel() == sChannel) {
 						if (receiving) {
 							buffer.clear();
-							int r = this.sChannel.read(buffer);
+							int r = -1;
+							try {
+								r = this.sChannel.read(buffer);
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
 							if (r == -1) {
 								String tcpmessage = "TCP connection broke down!\n";
 								this.receiver.appendTCP(tcpmessage);
 								System.out.printf("%s", tcpmessage);
-								this.sChannel.close();
+								try {
+									this.sChannel.close();
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
 								System.exit(1);
 							} else {
 								buffer.flip();
@@ -213,12 +270,11 @@ public class ReceiverReconstructor implements Runnable {
 								if (r == -1) {
 									System.exit(0);
 								} 
-								//System.out.printf("Ping registered\n");
 								pingback = true;
 							}
 						} else {
-							//xxxxxx
-													}
+							//xxxxxx nothing
+						}
 					} else {
 						System.err.printf("well, this is weird\n");
 					}
@@ -229,6 +285,9 @@ public class ReceiverReconstructor implements Runnable {
 		}
 	}
 
+	/**
+	 * Method for responding to pings from sender.
+	 */
 	public void pingBack() {
 		ByteBuffer intBuffer = ByteBuffer.allocate(Parameters.BUFFER_SIZE);
 		ByteBuffer countBuffer = ByteBuffer.allocate(4);
@@ -285,6 +344,9 @@ public class ReceiverReconstructor implements Runnable {
 		//System.out.printf("pq size is %d\n", this.pq.size());
 	}
 
+	/**
+	 * Write current contents of priority queue to file.
+	 */
 	public void writeToFile(PriorityQueue<Packet> q) {
 		Packet p = null;
 		ByteBuffer buffer = ByteBuffer.allocate(Parameters.DATA_BYTES);
@@ -299,5 +361,4 @@ public class ReceiverReconstructor implements Runnable {
 			}
 		}
 	}
-
 }
