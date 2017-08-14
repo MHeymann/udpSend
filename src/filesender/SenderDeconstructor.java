@@ -1,10 +1,19 @@
 package filesender;
 
-import java.io.*;
-import java.nio.*;
-import java.nio.channels.*;
-import java.net.*;
-import parameters.*;
+import java.io.IOException;
+import java.io.FileNotFoundException;
+import java.io.FileInputStream;
+
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
+import java.nio.channels.DatagramChannel;
+import java.nio.channels.FileChannel;
+import java.nio.channels.Selector;
+import java.nio.channels.SelectionKey;
+
+import java.net.InetSocketAddress;
+
+import parameters.Parameters;
 import java.util.HashMap;
 import java.util.Arrays;
 import packet.Packet;
@@ -21,6 +30,10 @@ public class SenderDeconstructor implements Runnable {
 	private Selector selector = null;
 	private HashMap<Integer, Packet> hMap = null;
 
+	/**
+	 * Construct a new Deconstructor of the file to systematically break
+	 * down the file into packets and send it to the receiving user.
+	 */
 	public SenderDeconstructor(String fileLocation, int fileSize, String IP_Address, int port, Sender sender) 
 	{
 		this.fileLocation = fileLocation;
@@ -34,11 +47,16 @@ public class SenderDeconstructor implements Runnable {
 		this.hMap = null;;
 	}
 
+	/*
 	public void run() {
 		go();
 	}
+	*/
 
-	public void go() {
+	/**
+	 * The method to run when the structure gets used to run a new thread.
+	 */
+	public void run() {
 		ByteBuffer sendBuff = ByteBuffer.allocate(Parameters.BUFFER_SIZE);
 		ByteBuffer readBuff = ByteBuffer.allocate(Parameters.DATA_BYTES);
 		FileInputStream fin;
@@ -110,6 +128,10 @@ public class SenderDeconstructor implements Runnable {
 		System.out.printf("Done sending file\n");
 	}
 
+	/**
+	 * Connect to a the receiving user for relaying control tcp
+	 * information.
+	 */
 	public boolean connect() {
 		ByteBuffer buffer = ByteBuffer.allocate(4);
 		try {
@@ -148,6 +170,9 @@ public class SenderDeconstructor implements Runnable {
 		return true;
 	}
 
+	/**
+	 * Signal to the receiver that the end of file has been reached.
+	 */
 	public void sigTerminate(ByteBuffer sendBuff) {
 		int r2;
 		sendBuff.clear();
@@ -163,6 +188,11 @@ public class SenderDeconstructor implements Runnable {
 		}
 
 	}
+	
+	/**
+	 * Coordinate with the receiver to ensure all packets up to this point
+	 * has been received. Resend packets if an error occured.
+	 */
 	public boolean ping(int start, int finish, ByteBuffer sendBuff, ByteBuffer readBuff) {
 		int r2;
 		sendBuff.clear();
@@ -171,7 +201,6 @@ public class SenderDeconstructor implements Runnable {
 		sendBuff.flip();
 	
 		try {
-			//this.sender.appendTCP("Ping\n");
 			this.socketChannel.write(sendBuff);
 			readBuff.clear();
 			selector.select();
