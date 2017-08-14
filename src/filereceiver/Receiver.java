@@ -6,20 +6,29 @@ import java.util.Arrays;
 import java.io.Console;
 import java.io.File;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import javax.swing.JButton;
+import javax.swing.JScrollPane;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.JFileChooser;
+import javax.swing.SwingConstants;
+
+import java.awt.GridLayout;
+import java.awt.BorderLayout;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 import layouts.RelativeLayout;
 
 
 public class Receiver extends JFrame implements ActionListener {
-
 	private static final long serialVersionUID = 1L;
-	/* For giving instructions on what to enter in the txt field below */
 
 	private final String giveLoc = "<File Location>";
-
+	/* For giving instructions on what to enter in the txt field below */
 	private JLabel label = null;
 	private JLabel lblLocation = null;
 
@@ -108,22 +117,38 @@ public class Receiver extends JFrame implements ActionListener {
 		(new Thread(recon)).start();
 	}
 
+	/**
+	 * Get the port being used.
+	 */
 	public int getPort() {
 		return this.portNo;
 	}
 
+	/**
+	 * Append information to the dedicated TCP messaging area.
+	 *
+	 * @param s The string to append.
+	 */
 	public void appendTCP(String s) 
 	{
 		taTCP.append(s);
 		taTCP.setCaretPosition(taTCP.getText().length() - 1);
 	}
 
+	/**
+	 * Append information to the dedicated UDP messaging area.
+	 *
+	 * @param s The string to append.
+	 */
 	public void appendUDP(String s) 
 	{
 		taUDP.append(s);
 		taUDP.setCaretPosition(taUDP.getText().length() - 1);
 	}
 
+	/**
+	 * Reset the GUI to the disconnected state.
+	 */
 	public void breakConnection() {
 		label.setText("Enter your Username and password below");
 		tfPortNo.setText("" + this.portNo);
@@ -132,6 +157,11 @@ public class Receiver extends JFrame implements ActionListener {
 		taUDP.setText("UDP message area:\n");
 	}
 
+	/**
+	 * Handle Gui actions.
+	 *
+	 * @param e The event that triggers this mehtod.
+	 */
 	public void actionPerformed(ActionEvent e) {
 		Object o = e.getSource();
 		int returnval;
@@ -139,14 +169,14 @@ public class Receiver extends JFrame implements ActionListener {
 
 		/* Disconnect being the button */
 		if (o == btnDisconnect) {
-			/*
-			speaker.logoff();
-			*/
 			this.breakConnection();
 			return;
 		}
 	}
 
+	/**
+	 * Start everything off.
+	 */
     public static void main(String[] args)  {
 		Receiver receiver = null;
 		receiver = new Receiver("localhost", 8000);
