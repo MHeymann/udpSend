@@ -5,19 +5,35 @@ import java.util.Arrays;
 import java.io.Console;
 import java.io.File;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
+import javax.swing.JLabel;
+import javax.swing.JFrame;
+import javax.swing.JTextField;
+import javax.swing.JTextArea;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.JFileChooser;
+import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
+
+import java.awt.GridLayout;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.FocusEvent;
 
 import layouts.RelativeLayout;
 
 
+/**
+ * This is a GUI for sending files over tcp.
+ */
 public class Sender extends JFrame implements ActionListener {
-
 	private static final long serialVersionUID = 1L;
-	/* For giving instructions on what to enter in the txt field below */
 
 	private final String giveLoc = "Please give file location";
+	/* For giving instructions on what to enter in the txt field below */
 	private JLabel label = null;
 	/* text field for entering file location */
 	private JTextField tfLocation = null;
@@ -31,7 +47,6 @@ public class Sender extends JFrame implements ActionListener {
 	private JButton btnBrowse = null; 
 	/* For displaying messages */
 	private JTextArea taTCP = null, taUDP = null;
-	/* current connection status */
 
 	private SenderDeconstructor deconstructor = null;
 
@@ -46,6 +61,9 @@ public class Sender extends JFrame implements ActionListener {
 	private String fileLocationString = "";
 	private int sendFileSize = -1;
 	
+	/**
+	 * Constructor for the GUI
+	 */
 	public Sender(String host, int port) {
 		super("TCP ##### Send File");
 		this.portNo = port;
@@ -140,18 +158,32 @@ public class Sender extends JFrame implements ActionListener {
 		btnConnectSend.requestFocus();
 	}
 
+	/**
+	 * Append info about the TCP connection.
+	 *
+	 * @param s The string to append.
+	 */
 	public void appendTCP(String s) 
 	{
 		taTCP.append(s);
 		taTCP.setCaretPosition(taTCP.getText().length() - 1);
 	}
 
+	/**
+	 * Append info about the UDP connection. Not used in this
+	 * implementation.
+	 *
+	 * @param s The string to append.
+	 */
 	public void appendUDP(String s) 
 	{
 		taUDP.append(s);
 		taUDP.setCaretPosition(taUDP.getText().length() - 1);
 	}
 
+	/**
+	 * Return the GUI to a disconnected state.
+	 */
 	public void breakConnection() {
 		btnConnectSend.setEnabled(true);
 		btnDisconnect.setEnabled(false);
@@ -168,6 +200,11 @@ public class Sender extends JFrame implements ActionListener {
 		taUDP.setText("UDP message area:\n");
 	}
 
+	/**
+	 * React to ActionEvents from the GUI.
+	 *
+	 * @param e the ActionEvent that triggers this method.
+	 */
 	public void actionPerformed(ActionEvent e) {
 		Object o = e.getSource();
 		int returnval;
@@ -230,6 +267,9 @@ public class Sender extends JFrame implements ActionListener {
 		}
 	}
 
+	/**
+	 * Main method for starting the sender from the command line.
+	 */
     public static void main(String[] args)  {
 		Sender sender = null;
 		sender = new Sender("localhost", 8000);
