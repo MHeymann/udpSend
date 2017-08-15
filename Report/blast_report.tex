@@ -82,37 +82,76 @@ global parameters need to be consistent throughout the source files
 \subsubsection{SenderDeconstructor.java}
 
 \section{Program description}
-
+sender receiver gui clients
+sender sets receiver ip
+set number of datagram packets get sent
+Acks of datagrams sent over tcp
+repeated until all packets sent
+receiver acks each batch 
+writes to local disk
+EOF terminating signal sent which tells receiver to finalise writing of file
 
 \section{Experiments}
 \subsection{Compare throughput of TCP and RBUDP data transfer}
+Hoe lank dit vat 200MB
 
 \subsection{Transfer rate of RBUDP}
+table
 
 \subsection{Different packet sizes in RBUDP}
+buffer size Parameters.java tussen 1 en 50 000
 
 \subsection{Varying packet loss rates}
+sender deconstructor
+Slows transfer 
+701MB
+74.81s
+72.81s
 
 \section{Issues encountered}
+udp socket channel set as blocking caused gridlocks in program
+very large files >2.2GB \#packets int used for % tracking wraps around.
 
 \section{Significant data structures}
+packet
+priority queue packets added, ordered by sequence number
 
 \section{Design}
+fixed burst sizes instead of moving send window
+java nio datagram channel
 
 \section{Compilation and Execution}
-The program contains make and run files.
-\subsection{server}
-To compile and run:
+The program contains make and run files.\\\\
+To compile UDP:
 \begin{verbatim}
 	cd src
 	./make.sh
-	./run.sh
 \end{verbatim}
-Run two applications, one to send and one to receive. On the first display
-select send/receive to open a sender/receiver respectively.
+To compile TCP:
+\begin{verbatim}
+	cd src
+	./maketcp.sh
+\end{verbatim}
+To run UDP sender:
+\begin{verbatim}
+	./run.sh send
+\end{verbatim}
+To run UDP receiver:
+\begin{verbatim}
+	./run.sh receive
+\end{verbatim}
+To run TCP sender:
+\begin{verbatim}
+	./runtcp.sh send
+\end{verbatim}
+To run TCP receiver:
+\begin{verbatim}
+	./runtcp.sh receive
+\end{verbatim}
 
 \section{Conclusion}
-
+although success in reliable udp tcp still faster by orders of magnitude while also being reliable. 
+int should be long int
 
 \pagebreak
 \bibliographystyle{plain}
