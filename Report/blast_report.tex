@@ -1,0 +1,121 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage{graphicx}
+\usepackage[hidelinks]{hyperref}
+
+\title{CS 354\\Tutorial 2: RBUDP}
+\author{M. Heymann\\15988694@sun.ac.za \and J. Lombard\\16994914@sun.ac.za}
+\date{16 August 2017}
+
+\begin{document}
+
+\clearpage\maketitle
+\thispagestyle{empty} % make sure no page numbers on title page
+
+\pagebreak
+
+\clearpage\tableofcontents
+\thispagestyle{empty}
+
+\pagebreak
+\setcounter{page}{1} % Set the page counter to 1
+
+\section{Introduction}
+The purpose of this project is to understand UDP and TCP for transfering files
+over a network.\\\\
+Reliable Blast User Datagram Protocol is a data transfer tool and protocol
+specifically designed to move very large files over wide area high-speed
+networks \cite{udpDef}.\\\\
+Transmission Control Protocol/Internet Protocol is the communication language
+used for the Internet and it can also be used on private networks
+\cite{tcpDef}.\\
+The protocols map to a four-layer model \cite{map}:
+\begin{enumerate}
+	\item Network Interface (Ethernet)
+	\item Network (IP)
+	\item Transport (TCP, UDP)
+	\item Application (HTTP)
+\end{enumerate}
+The reliability and transfer rates of these protocols are compared.
+
+\section{Unimplemented features}
+All the specified features were implemented.
+
+\section{Description of files}
+The program consists of 12 java files.
+
+\subsection{ShareFile.java}
+ShareFile.java is the driver file for UDP transfers.
+
+\subsection{ShareTCP.java}
+ShareTCP.java is the driver file for TCP transfers.
+
+\subsection{filereceiver}
+\subsubsection{Receiver.java}
+gui that enables receiving with udp
+\subsubsection{ReceiverReconstructor.java}
+runs separate thread receive packets indiv orders and write to file
+
+\subsection{filesender}
+\subsubsection{Sender.java}
+gui
+\subsubsection{SenderDeconstructor.java}
+thread file into datagram packets send
+
+\subsection{layouts}
+\subsubsection{RelativeLayout.java}
+gui external lib
+
+\subsection{packet}
+\subsubsection{Packet.java}
+datagram packet abstraction
+
+\subsection{parameters}
+\subsubsection{Parameters.java}
+global parameters need to be consistent throughout the source files
+
+\subsection{tcpreceiver}
+\subsubsection{Receiver.java}
+\subsubsection{ReceiverReconstructor.java}
+
+\subsection{tcpsender}
+\subsubsection{Sender.java}
+\subsubsection{SenderDeconstructor.java}
+
+\section{Program description}
+
+
+\section{Experiments}
+\subsection{Compare throughput of TCP and RBUDP data transfer}
+
+\subsection{Transfer rate of RBUDP}
+
+\subsection{Different packet sizes in RBUDP}
+
+\subsection{Varying packet loss rates}
+
+\section{Issues encountered}
+
+\section{Significant data structures}
+
+\section{Design}
+
+\section{Compilation and Execution}
+The program contains make and run files.
+\subsection{server}
+To compile and run:
+\begin{verbatim}
+	cd src
+	./make.sh
+	./run.sh
+\end{verbatim}
+Run two applications, one to send and one to receive. On the first display
+select send/receive to open a sender/receiver respectively.
+
+\section{Conclusion}
+
+
+\pagebreak
+\bibliographystyle{plain}
+\bibliography{references.bib}
+
+\end{document}
