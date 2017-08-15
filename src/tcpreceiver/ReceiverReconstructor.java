@@ -1,19 +1,30 @@
 package tcpreceiver;
 
-import java.net.*;
-import java.nio.channels.*;
-import java.nio.*;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.FileChannel;
+import java.nio.channels.SocketChannel;
+import java.nio.channels.Selector;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.ClosedChannelException;
+
+import java.nio.ByteBuffer;
 import java.io.FileOutputStream;
-import java.util.*;
 import java.io.IOException;
+import java.io.FileNotFoundException;
+
+import java.util.Set;
+import java.util.Iterator;
 import javax.swing.JOptionPane;
-/*
-import java.lang.System;
-*/
 
-import packet.*;
-import parameters.*;
+import parameters.Parameters;
 
+/**
+ * This Class drives the thread that reconstrcuts a file and saves it
+ * again.
+ */
 public class ReceiverReconstructor implements Runnable {
 	private Receiver receiver = null;
 	private int port = -1;
@@ -27,6 +38,9 @@ public class ReceiverReconstructor implements Runnable {
 	private int currentRead = 0;
 	private long fPosition = -1;
 
+	/**
+	 * Constructor for File Reconstructor
+	 */
 	public ReceiverReconstructor(Receiver receiver, int port) {
 		InetSocketAddress address = null;
 		ServerSocket serverSocket = null;
@@ -53,16 +67,7 @@ public class ReceiverReconstructor implements Runnable {
 		}
 	}
 
-	public void run() {
-		try {
-			go();
-		} catch (Exception e) {
-			this.receiver.appendTCP("Some problem in Receive Listener\n");
-			e.printStackTrace();
-		}
-	}
-
-	public void go() throws Exception
+	public void run()
 	{
 		SocketChannel sChannel = null;
 		SelectionKey key = null;
@@ -72,7 +77,12 @@ public class ReceiverReconstructor implements Runnable {
 		int n;
 
 		while (true) {
-			n = selector.select();
+			try {
+				n = selector.select();
+			} catch (IOException e) {
+				System.err.printf("Could not select on selector.\n");
+				e.printStackTrace();
+			}
 			
 			selectedKeys = null;
 			selectedKeys = selector.selectedKeys();
@@ -105,14 +115,25 @@ public class ReceiverReconstructor implements Runnable {
 					}
 
 					sChannel = null;
-					sChannel = serverSocketChannel.accept();
-					sChannel.configureBlocking(false);
-					sChannel.register(selector, SelectionKey.OP_READ);
+					try {
+						sChannel = serverSocketChannel.accept();
+						sChannel.configureBlocking(false);
+						sChannel.register(selector, SelectionKey.OP_READ);
+					} catch (IOException e) {
+						System.err.printf("Could not register new sChannel\n");
+						e.printStackTrace();
+					}
 					this.receiver.appendTCP("New TCP connection from " + sChannel.toString() + "\n");
 
 					this.startTime = System.currentTimeMillis();
 
-					FileOutputStream fout = new FileOutputStream(this.filePath);
+					FileOutputStream fout = null;
+					try {
+						fout = new FileOutputStream(this.filePath);
+					} catch (FileNotFoundException e) {
+						System.err.printf("Could not create FileOutputStream\n");
+						e.printStackTrace();
+					}
 					this.fcout = fout.getChannel();
 					it.remove();
 				} else if ((key.readyOps() & SelectionKey.OP_READ)
@@ -121,46 +142,27 @@ public class ReceiverReconstructor implements Runnable {
 					System.out.println("mewp %ld" + fPosition);
 
 					sChannel = (SocketChannel)key.channel();
-					long readCount = fcout.transferFrom(sChannel, fPosition, Integer.MAX_VALUE); 
+					long readCount = 0; 
+					try {
+						readCount = fcout.transferFrom(sChannel, fPosition, Integer.MAX_VALUE); 
+					} catch (IOException e) {
+						System.err.printf("Could not transfer file from sChannel\n");
+						e.printStackTrace();
+					}
 					if (readCount == 0) {
 						this.endTime = System.currentTimeMillis();
 						double time = ((this.endTime - this.startTime) / 100 + 0.1) / 10;
 						receiver.appendTCP("Time taken in seconds: " + time + "\n");
 						System.out.println("Time taken in seconds: " + time);
-						sChannel.close();
+						try {
+							sChannel.close();
+						} catch (IOException e) {
+							System.err.printf("IOException closing schannel\n");
+							e.printStackTrace();
+						}
 					} else {
 						fPosition += readCount;
 					}
-
-					/*
-					buffer.clear();
-					int r = sChannel.read(buffer);
-					if (r == -1) {
-						String tcpmessage = "TCP connection broke down!\n";
-						this.receiver.appendTCP(tcpmessage);
-						System.out.printf("%s", tcpmessage);
-						sChannel.close();
-
-						this.endTime = System.currentTimeMillis();
-						double time = ((this.endTime - this.startTime) / 100 + 0.1) / 10;
-						receiver.appendTCP("Time taken in seconds: " + time + "\n");
-						System.out.println("Time taken in seconds: " + time);
-
-					} else {
-						buffer.flip();
-						try {
-							fcout.write(buffer);
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}
-					*/
-
-					/*
-					double percentage = ((((10000L * (1 + currentRead)) / this.expectedReads) + 0.0) / 100);
-
-					this.receiver.appendTCP("" + percentage + "%\n");
-					*/
 
 					currentRead++;
 					it.remove();
