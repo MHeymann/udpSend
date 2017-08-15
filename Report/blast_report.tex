@@ -108,33 +108,94 @@ writes to local disk
 EOF terminating signal sent which tells receiver to finalise writing of file
 
 \section{Experiments}
-\subsection{Compare throughput of TCP and RBUDP data transfer}
-Hoe lank dit vat 200MB
+\subsection{Throughput of TCP and RBUDP data transfer}
+\begin{tabular}{|ccc|r@.l|r@.l|}
+	\hline
+	\multicolumn{3}{|c|}{File size} & \multicolumn{4}{|c|}{Time (seconds)}\\
+	\hline
+	\multicolumn{3}{|c|}{(bytes)} & \multicolumn{2}{c|}{TCP} &
+	\multicolumn{2}{c|}{UDP}\\
+	\hline
+	& 264 & 228 & 0 & 01 & 0 & 01\\
+	\hline
+	& 368 & 618 & 0 & 01 & 0 & 01\\
+	\hline
+	3 & 029 & 804 & 0 & 01 & 0 & 01\\
+	\hline
+	89 & 740 & 009 & 0 & 01 & 0 & 91\\
+	\hline
+	102 & 802 & 047 & 0 & 01 & 0 & 91\\
+	\hline
+	140 & 062 & 720 & 0 & 01 & 1 & 31\\
+	\hline
+	199 & 273 & 479 & 0 & 11 & 1 & 91\\
+	\hline
+\end{tabular}
 
 \subsection{Transfer rate of RBUDP}
-table
+\begin{tabular}{|cccc|r@.l|}
+	\hline
+	\multicolumn{4}{|c|}{File size} & \multicolumn{2}{|c|}{Time}\\
+	\hline
+	\multicolumn{4}{|c|}{(bytes)} &
+	\multicolumn{2}{c|}{(seconds)}\\
+	\hline
+	& & 264 & 228 & 0 & 01\\
+	\hline
+	& & 368 & 618 & 0 & 01\\
+	\hline
+	& 3 & 029 & 804 & 0 & 01\\
+	\hline
+	& 89 & 740 & 009 & 0 & 91\\
+	\hline
+	& 102 & 802 & 047 & 0 & 91\\
+	\hline
+	& 140 & 062 & 720 & 1 & 31\\
+	\hline
+	& 199 & 273 & 479 & 1 & 91\\
+	\hline
+	& 870 & 701 & 581 & 10 & 81\\
+	\hline
+	1 & 235 & 459 & 142 & 17 & 11\\
+	\hline
+	1 & 900 & 032 & 010 & 35 & 51\\
+	\hline
+	2 & 060 & 362 & 926 & 47 & 01\\
+	\hline
+\end{tabular}
 
 \subsection{Different packet sizes in RBUDP}
 buffer size Parameters.java tussen 1 en 50 000
 
 \subsection{Varying packet loss rates}
 sender deconstructor
-Slows transfer 
+Slows transfer
 701MB
 74.81s
 72.81s
 
 \section{Issues encountered}
-udp socket channel set as blocking caused gridlocks in program
-very large files >2.2GB \#packets int used for % tracking wraps around.
+An issue encountered while writing this program was having the UDP socket set
+as blocking caused gridlocks in the program.\\
+Another issue was when files larger than 2.2GB is sent using UDP. The interger
+used for percentage tracking wraps around and the values becomes garbage.
 
 \section{Significant data structures}
-packet
-priority queue packets added, ordered by sequence number
+A new defined datastructure for the program is a Packet with the fields:
+\begin{itemize}
+	\item int sequenceNumber
+	\item int size
+	\item byte[] data
+\end{itemize}
+Another significant data structure used in this program is a priority queue of
+packets. The packets are ordered by sequece number.
 
 \section{Design}
-fixed burst sizes instead of moving send window
-java nio datagram channel
+For this program it was decided to used fixed burst sizes instead of a moving
+send window. Before the next burst is sent an acknowledgement of the previous
+burst must be received.\\
+Another decision made was to use the built in Java NIO datagram channel since
+Java NIO was already being used.
 
 \section{Compilation and Execution}
 The program contains make and run files.\\\\
@@ -166,8 +227,12 @@ To run TCP receiver:
 \end{verbatim}
 
 \section{Conclusion}
-although success in reliable udp tcp still faster by orders of magnitude while also being reliable. 
-int should be long int
+From the experiments it is clear that TCP is faster by orders of magnitude.
+Although UDP was reliable it seems TCP has more advantages.
+Experimenting with packet loss shows that losing packets slows the transfer
+rate noticably.\\\\
+The experiments also revealed that the interger used for percentage tracking
+should have been a long int.
 
 \pagebreak
 \bibliographystyle{plain}
