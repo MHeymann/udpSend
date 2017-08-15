@@ -19,7 +19,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 /*
- * Author Murray Heymann & Ludwe Mtakati
+ * Author Murray Heymann and Jolandi Lombard
  *
  * This file is starts the client.  If it is started in gui mode, the swing
  * components are created and managed from here.  Threads for incoming and
@@ -44,6 +44,12 @@ public class ShareTCP extends JFrame implements ActionListener {
 	/* The host ip address */
 	private String recAddress = null;
 	
+	/**
+	 * Construct the generic staring gui for sending or receiving
+	 *
+	 * @param host The host ip address to send a file to.
+	 * @param port The port on which the tcp connection communicates.
+	 */
 	public ShareTCP(String host, int port) {
 		super("TCP ##### Share File");
 		this.portNo = port;
@@ -66,9 +72,6 @@ public class ShareTCP extends JFrame implements ActionListener {
 		/* put all of this in the north panel */
 		northPanel.add(receiverPortPanel);
 
-		/* The label and text field for communication */
-
-
 		this.add(northPanel, BorderLayout.NORTH);
 
 		/* 
@@ -90,13 +93,17 @@ public class ShareTCP extends JFrame implements ActionListener {
 
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		/*
-EXIT_ON_CLOSE
+		EXIT_ON_CLOSE
 		*/
 		this.setSize(600, 100);
 		this.setVisible(true);
 	}
 	
-
+	/**
+	 * Manage actions from the swing gui.  
+	 *
+	 * @param e The Event that triggered this method.
+	 */
 	public void actionPerformed(ActionEvent e) {
 		Object o = e.getSource();
 
@@ -140,6 +147,9 @@ EXIT_ON_CLOSE
 		}
 	}
 
+	/**
+	 * The start of the method from command line.
+	 */
     public static void main(String[] args)  {
 		ShareTCP sender = null;
 		sender = new ShareTCP("localhost", 8000);
