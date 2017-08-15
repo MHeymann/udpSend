@@ -5,20 +5,34 @@ import java.util.Arrays;
 import java.io.Console;
 import java.io.File;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
+//import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import javax.swing.JTextArea;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.JFileChooser;
+import javax.swing.JScrollPane;
+
+//import java.awt.*;
+import java.awt.GridLayout;
+import java.awt.BorderLayout;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 import layouts.RelativeLayout;
 
-
+/**
+ * This is a GUI for the Receiver Client.
+ */
 public class Receiver extends JFrame implements ActionListener {
 
 	private static final long serialVersionUID = 1L;
-	/* For giving instructions on what to enter in the txt field below */
-
 	private final String giveLoc = "<File Location>";
 
+	/* For giving instructions on what to enter in the txt field below */
 	private JLabel label = null;
 	private JLabel lblLocation = null;
 
@@ -107,22 +121,39 @@ public class Receiver extends JFrame implements ActionListener {
 		(new Thread(recon)).start();
 	}
 
+	/**
+	 * Return the port on which the receiver listens
+	 */
 	public int getPort() {
 		return this.portNo;
 	}
 
+	/**
+	 * Add messages to the TCP listen area.
+	 *
+	 * @param s The message to add.
+	 */
 	public void appendTCP(String s) 
 	{
 		taTCP.append(s);
 		taTCP.setCaretPosition(taTCP.getText().length() - 1);
 	}
 
+	/**
+	 * Add messages to the UDP listen area. Superfluous in the tcp
+	 * receiver.
+	 *
+	 * @param s The message to add.
+	 */
 	public void appendUDP(String s) 
 	{
 		taUDP.append(s);
 		taUDP.setCaretPosition(taUDP.getText().length() - 1);
 	}
 
+	/**
+	 * Return this GUI to the disconnected state.
+	 */
 	public void breakConnection() {
 		label.setText("Enter your Username and password below");
 		tfPortNo.setText("" + this.portNo);
@@ -131,6 +162,11 @@ public class Receiver extends JFrame implements ActionListener {
 		taUDP.setText("UDP message area:\n");
 	}
 
+	/**
+	 * Manage user interactions with the GUI.
+	 *
+	 * @param e The ActionEvent that triggers this method.
+	 */
 	public void actionPerformed(ActionEvent e) {
 		Object o = e.getSource();
 		int returnval;
@@ -138,14 +174,14 @@ public class Receiver extends JFrame implements ActionListener {
 
 		/* Disconnect being the button */
 		if (o == btnDisconnect) {
-			/*
-			speaker.logoff();
-			*/
 			this.breakConnection();
 			return;
 		}
 	}
 
+	/**
+	 * Start the receiver from the command line.
+	 */
     public static void main(String[] args)  {
 		Receiver receiver = null;
 		receiver = new Receiver("localhost", 8000);
