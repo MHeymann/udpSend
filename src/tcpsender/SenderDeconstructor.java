@@ -1,14 +1,24 @@
 package tcpsender;
 
-import java.io.*;
-import java.nio.*;
-import java.nio.channels.*;
-import java.net.*;
-import parameters.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
+import java.nio.channels.FileChannel;
+
 import java.util.HashMap;
 import java.util.Arrays;
+
+import java.net.InetSocketAddress;
+import parameters.Parameters;
 import packet.Packet;
 
+/**
+ * A class to govern the thread that breaks down a file being sent over
+ * tcp.
+ */
 public class SenderDeconstructor implements Runnable {
 	private String fileLocation = null;
 	private int fileSize = -1;
@@ -19,6 +29,9 @@ public class SenderDeconstructor implements Runnable {
 	private InetSocketAddress address = null;
 	private HashMap<Integer, Packet> hMap = null;
 
+	/**
+	 * Constructor for the class;
+	 */
 	public SenderDeconstructor(String fileLocation, int fileSize, String IP_Address, int port, Sender sender) 
 	{
 		this.fileLocation = fileLocation;
@@ -30,11 +43,11 @@ public class SenderDeconstructor implements Runnable {
 		this.hMap = null;;
 	}
 
+	/**
+	 * The method that gets called by the thread responsible for this
+	 * class.
+	 */
 	public void run() {
-		go();
-	}
-
-	public void go() {
 		FileInputStream fin;
 		FileChannel fcin;
 		int r = 0, r2 = 0;
@@ -54,10 +67,6 @@ public class SenderDeconstructor implements Runnable {
 			e.printStackTrace();
 		}
 
-		/*
-		this.incrementalSend(fcin);
-		 */
-		
 		try {
 			fin.close();
 			this.socketChannel.close();
@@ -65,37 +74,6 @@ public class SenderDeconstructor implements Runnable {
 			e.printStackTrace();
 		}
 		System.out.printf("Done sending file\n");
-	}
-
-	public void incrementalSend(FileChannel fcin) {
-		int i, r = -1;
-		ByteBuffer buffer = ByteBuffer.allocate(Parameters.BUFFER_SIZE);
-
-		i = 0;
-		while(true) {
-			buffer.clear();
-			System.out.printf("send %d\n", i);
-
-			try {
-				r = fcin.read(buffer);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
-			if (r == -1) {
-				break;
-			}
-
-			buffer.flip();
-			try {
-				this.socketChannel.write(buffer);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
-			i++;
-		}
-
 	}
 
 	public boolean connect() {
