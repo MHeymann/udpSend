@@ -92,19 +92,19 @@ public class SenderDeconstructor implements Runnable {
 				readBuff.flip();
 				Packet packet = new Packet(sequenceNo, r1, Arrays.copyOf(readBuff.array(), readBuff.limit()));
 				hMap.put(sequenceNo, packet);
+
+				//TODO Experiments by Jolandi
 				/*
+				if (i == 10) {
+					continue;
+				}
 				*/
 	
 				int destPort = this.port + (sequenceNo % Parameters.PORTS);
 				address = new InetSocketAddress(this.IP_Address, destPort);
 
 				packet.sendPacket(this.datagramChannel, address);
-				/*
-				if (i % 100 == 0) {
-				} else {
-					packet.sendPacket(this.datagramChannel, address);
-				}
-				*/
+				
 			}
 
 
