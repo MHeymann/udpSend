@@ -51,35 +51,51 @@ ShareTCP.java is the driver file for TCP transfers.
 
 \subsection{filereceiver}
 \subsubsection{Receiver.java}
-gui that enables receiving with udp
+Receiver.java creates the GUI that enables receiving files with UDP.
 \subsubsection{ReceiverReconstructor.java}
-runs separate thread receive packets indiv orders and write to file
+RecevierReconstructor.java runs on a separate threads. It receives packets
+individually and order the packets by sequence numbers.
+The packets are then written to a file.
 
 \subsection{filesender}
 \subsubsection{Sender.java}
-gui
+Sender.java creates the GUI that enables sending files with UDP.
 \subsubsection{SenderDeconstructor.java}
-thread file into datagram packets send
+SenderDeconstructor.java runs on a separate thread. The files are broken up
+into datagram packets with unique sequnce numbers. The packets are then sent
+using UDP.
 
 \subsection{layouts}
 \subsubsection{RelativeLayout.java}
-gui external lib
+RelativeLayout.java is an external library for the general layout of the GUIs.
 
 \subsection{packet}
 \subsubsection{Packet.java}
-datagram packet abstraction
+Packet.java is a datagram packet abstraction.
+\begin{itemize}
+	\item int sequenceNumber
+	\item int size
+	\item byte[] data
+\end{itemize}
 
 \subsection{parameters}
 \subsubsection{Parameters.java}
-global parameters need to be consistent throughout the source files
+Parameters.java contains global parameters that need to be consistent
+throughout the source files.
 
 \subsection{tcpreceiver}
 \subsubsection{Receiver.java}
+Receiver.java creates the GUI that enables receiving files with TCP.
 \subsubsection{ReceiverReconstructor.java}
+RecevierReconstructor.java runs on a separate threads. It receives packets
+individually and writes the packets to a file.
 
 \subsection{tcpsender}
 \subsubsection{Sender.java}
+Sender.java creates the GUI that enables sending files with TCP.
 \subsubsection{SenderDeconstructor.java}
+SenderDeconstructor.java runs on a separate thread. The files are broken up
+into packets which are sent using TCP.
 
 \section{Program description}
 sender receiver gui clients
