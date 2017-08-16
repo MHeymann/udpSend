@@ -200,11 +200,32 @@ EOF terminating signal sent which tells receiver to finalise writing of file
 \end{tabular}
 
 \subsection{Varying packet loss rates}
-sender deconstructor
-Slows transfer
-701MB
-74.81s
-72.81s
+\begin{tabular}{|cccc|r@.l|r@.l|r@.l|r@.l|}
+	\hline
+	\multicolumn{4}{|c|}{File size} & \multicolumn{8}{c|}{Time (seconds)}\\
+	\hline
+	\multicolumn{4}{|c|}{(bytes)} &
+	\multicolumn{8}{c|}{Every $n^{th}$ packet dropped}\\
+	\hline
+	& & & & \multicolumn{2}{c|}{0} & \multicolumn{2}{c|}{10} & 
+	\multicolumn{2}{c|}{50} &
+	\multicolumn{2}{c|}{100}\\
+	\hline
+	& & 264 & 228 & 0 & 01 & 0 & 01 & 0 & 01 & 0 & 01\\
+	\hline
+	& & 368 & 618 & 0 & 01 & 0 & 01 & 0 & 01 & 0 & 01\\
+	\hline
+	& 3 & 029 & 804 & 0 & 01 & 0 & 01 & 0 & 01 & 0 & 01\\
+	\hline
+	& 89 & 740 & 009 & 0 & 91 & 1 & 81 & 1 & 51 & 1 & 81\\
+	\hline
+	& 102 & 802 & 047 & 0 & 91 & 1 & 91 & 1 & 91 & 2 & 41\\
+	\hline
+	& 140 & 062 & 720 & 1 & 31 & 2 & 11 & 2 & 31 & 2 & 71\\
+	\hline
+	& 199 & 273 & 479 & 1 & 91 & 3 & 01 & 3 & 51 & 3 & 51\\
+	\hline
+\end{tabular}
 
 \section{Issues encountered}
 An issue encountered while writing this program was having the UDP socket set
@@ -263,8 +284,8 @@ From the experiments it is clear that TCP is faster by orders of magnitude.
 Although UDP was reliable it seems TCP has more advantages.
 Experimenting with packet sizes shows that larger packets may not necessarily
 speed up the transfer.
-Experimenting with packet loss shows that losing packets slows the transfer
-rate noticably.\\\\
+Experimenting with packet drop rates shows that dropping packets slows the
+transfer rate noticably in most cases.\\\\
 The experiments also revealed that the interger used for percentage tracking
 should have been a long int.
 
