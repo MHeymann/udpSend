@@ -124,6 +124,7 @@ receiver, who then writes the final packets to the file.
 Different file sizes were sent over the connection, up to a size of 200 MB.
 the time taken by TCP and RUDP respectively was noted. TCP is clearly
 more efficient than this implementation of RUDP.
+\\\\
 \begin{tabular}{|ccc|r@.l|r@.l|}
 	\hline
 	\multicolumn{3}{|c|}{File size} & \multicolumn{4}{|c|}{Time (seconds)}\\
@@ -183,7 +184,7 @@ more efficient than this implementation of RUDP.
 Different payload sizes for UDP datagrams was used and the transfer time
 was noted, for various file sizes.  Having a datagram payload size of about
 50 KB did speed up transfer rates marginally.
-\\
+\\\\
 \begin{tabular}{|cccc|r@.l|r@.l|r@.l|}
 	\hline
 	\multicolumn{4}{|c|}{File size} & \multicolumn{6}{c|}{Time (seconds)}\\
@@ -219,8 +220,34 @@ was noted, for various file sizes.  Having a datagram payload size of about
 \end{tabular}
 
 \subsection{Varying packet loss rates}
-The sender was artificially altered to drop one packet in every 128 burst.
-this slowed the transfer rate for a 701 MB file from 72.81s to 74.81s.
+The sender was artificially altered to drop packets.
+\\\\
+\begin{tabular}{|cccc|r@.l|r@.l|r@.l|r@.l|}
+	\hline
+	\multicolumn{4}{|c|}{File size} & \multicolumn{8}{c|}{Time (seconds)}\\
+	\hline
+	\multicolumn{4}{|c|}{(bytes)} &
+	\multicolumn{8}{c|}{Every $n^{th}$ packet dropped}\\
+	\hline
+	& & & & \multicolumn{2}{c|}{0} & \multicolumn{2}{c|}{10} & 
+	\multicolumn{2}{c|}{50} &
+	\multicolumn{2}{c|}{100}\\
+	\hline
+	& & 264 & 228 & 0 & 01 & 0 & 01 & 0 & 01 & 0 & 01\\
+	\hline
+	& & 368 & 618 & 0 & 01 & 0 & 01 & 0 & 01 & 0 & 01\\
+	\hline
+	& 3 & 029 & 804 & 0 & 01 & 0 & 01 & 0 & 01 & 0 & 01\\
+	\hline
+	& 89 & 740 & 009 & 0 & 91 & 1 & 81 & 1 & 51 & 1 & 81\\
+	\hline
+	& 102 & 802 & 047 & 0 & 91 & 1 & 91 & 1 & 91 & 2 & 41\\
+	\hline
+	& 140 & 062 & 720 & 1 & 31 & 2 & 11 & 2 & 31 & 2 & 71\\
+	\hline
+	& 199 & 273 & 479 & 1 & 91 & 3 & 01 & 3 & 51 & 3 & 51\\
+	\hline
+\end{tabular}
 
 \section{Issues encountered}
 An issue encountered while writing this program was having the UDP socket set

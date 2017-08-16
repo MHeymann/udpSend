@@ -94,11 +94,11 @@ public class SenderDeconstructor implements Runnable {
 				hMap.put(sequenceNo, packet);
 
 				//TODO Experiments by Jolandi
-				/*
-				if (i == 10) {
+			/*	
+				if (i == 50) {
 					continue;
-				}
-				*/
+				}*/
+				
 	
 				int destPort = this.port + (sequenceNo % Parameters.PORTS);
 				address = new InetSocketAddress(this.IP_Address, destPort);
