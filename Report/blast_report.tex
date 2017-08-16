@@ -20,7 +20,7 @@
 \setcounter{page}{1} % Set the page counter to 1
 
 \section{Introduction}
-The purpose of this project is to understand UDP and TCP for transfering files
+The purpose of this project is to understand UDP and TCP for transferring files
 over a network.\\\\
 Reliable Blast User Datagram Protocol is a data transfer tool and protocol
 specifically designed to move very large files over wide area high-speed
@@ -41,7 +41,7 @@ The reliability and transfer rates of these protocols are compared.
 All the specified features were implemented.
 
 \section{Description of files}
-The program consists of 12 java files.
+The program consists of 12 Java files.
 
 \subsection{ShareFile.java}
 ShareFile.java is the driver file for UDP transfers.
@@ -53,16 +53,17 @@ ShareTCP.java is the driver file for TCP transfers.
 \subsubsection{Receiver.java}
 Receiver.java creates the GUI that enables receiving files with UDP.
 \subsubsection{ReceiverReconstructor.java}
-RecevierReconstructor.java runs on a separate threads. It receives packets
-individually and order the packets by sequence numbers.
-The packets are then written to a file.
+ReceiverReconstructor.java runs on a separate thread. It receives packets
+individually and order the packets by sequence number.
+The packets are then written to a new file, of which the file name was
+specified by the receiving user when transfer begins.
 
 \subsection{filesender}
 \subsubsection{Sender.java}
 Sender.java creates the GUI that enables sending files with UDP.
 \subsubsection{SenderDeconstructor.java}
 SenderDeconstructor.java runs on a separate thread. The files are broken up
-into datagram packets with unique sequnce numbers. The packets are then sent
+into datagram packets with unique sequence numbers. The packets are then sent
 using UDP.
 
 \subsection{layouts}
@@ -73,9 +74,10 @@ RelativeLayout.java is an external library for the general layout of the GUIs.
 \subsubsection{Packet.java}
 Packet.java is a datagram packet abstraction.
 \begin{itemize}
-	\item int sequenceNumber
-	\item int size
-	\item byte[] data
+	\item int sequenceNumber - orders the packets upon reconstruction of
+		the file
+	\item int size - The total size of the packet payload.
+	\item byte[] data - The data being sent in this packet.
 \end{itemize}
 
 \subsection{parameters}
@@ -87,7 +89,7 @@ throughout the source files.
 \subsubsection{Receiver.java}
 Receiver.java creates the GUI that enables receiving files with TCP.
 \subsubsection{ReceiverReconstructor.java}
-RecevierReconstructor.java runs on a separate threads. It receives packets
+ReceiverReconstructor.java runs on a separate threads. It receives packets
 individually and writes the packets to a file.
 
 \subsection{tcpsender}
@@ -98,17 +100,30 @@ SenderDeconstructor.java runs on a separate thread. The files are broken up
 into packets which are sent using TCP.
 
 \section{Program description}
-sender receiver gui clients
-sender sets receiver ip
-set number of datagram packets get sent
-Acks of datagrams sent over tcp
-repeated until all packets sent
-receiver acks each batch 
-writes to local disk
-EOF terminating signal sent which tells receiver to finalise writing of file
+Initially the sender and receiver launch their GUI clients on their
+respective computers.  The sender sets receiver's IP, selects a file and
+hits send.
+
+Before anything else, the number of datagram packets that the file consists
+of gets sent to the receiver.  This is mostly to enable percentage tracking
+of the file as it gets sent.  
+
+Batches of datagrams are sent, at the end of which the sender requests
+acknowledgements of each. This acknowledgement happens over TCP. If a
+packet didn't make it to the receiver, this is when the sender gets
+notified. Only when all packets in the batch was acknowledged does
+transmission continue with the next batch. Also, once a batch has been
+completely acknowledged, the receiver writes the whole batch to file. 
+
+At the end of transmission, and end of file signal gets sent to the
+receiver, who then writes the final packets to the file.  
 
 \section{Experiments}
 \subsection{Throughput of TCP and RBUDP data transfer}
+
+Different file sizes were sent over the connection, up to a size of 200 MB.
+the time taken by TCP and RUDP respectively was noted. TCP is clearly
+more efficient than this implementation of RUDP.
 \begin{tabular}{|ccc|r@.l|r@.l|}
 	\hline
 	\multicolumn{3}{|c|}{File size} & \multicolumn{4}{|c|}{Time (seconds)}\\
@@ -165,11 +180,15 @@ EOF terminating signal sent which tells receiver to finalise writing of file
 \end{tabular}
 
 \subsection{Different packet sizes in RBUDP}
+Different payload sizes for UDP datagrams was used and the transfer time
+was noted, for various file sizes.  Having a datagram payload size of about
+50 KB did speed up transfer rates marginally.
+\\
 \begin{tabular}{|cccc|r@.l|r@.l|r@.l|}
 	\hline
 	\multicolumn{4}{|c|}{File size} & \multicolumn{6}{c|}{Time (seconds)}\\
 	\hline
-	\multicolumn{4}{|c|}{(bytes)} &
+	\multicolumn{4}{|c|}{(kilobytes)} &
 	\multicolumn{6}{c|}{Packet size (bytes)}\\
 	\hline
 	& & & & \multicolumn{2}{c|}{5} & \multicolumn{2}{c|}{25} &
@@ -200,17 +219,16 @@ EOF terminating signal sent which tells receiver to finalise writing of file
 \end{tabular}
 
 \subsection{Varying packet loss rates}
-sender deconstructor
-Slows transfer
-701MB
-74.81s
-72.81s
+The sender was artificially altered to drop one packet in every 128 burst.
+this slowed the transfer rate for a 701 MB file from 72.81s to 74.81s.
 
 \section{Issues encountered}
 An issue encountered while writing this program was having the UDP socket set
-as blocking caused gridlocks in the program.\\
-Another issue was when files larger than 2.2GB is sent using UDP. The interger
-used for percentage tracking wraps around and the values becomes garbage.
+as blocking caused gridlocks in the program when sending large files.
+Although this is a minor bug, it was difficult to pinpoint.\\
+Another minor issue was when files larger than 2.2GB is sent using UDP. The integer
+used for percentage tracking wraps around and the values becomes
+meaningless.
 
 \section{Significant data structures}
 A new defined datastructure for the program is a Packet with the fields:
@@ -219,53 +237,54 @@ A new defined datastructure for the program is a Packet with the fields:
 	\item int size
 	\item byte[] data
 \end{itemize}
-Another significant data structure used in this program is a priority queue of
-packets. The packets are ordered by sequece number.
+Another data structure used in this program is a priority queue of
+packets. The packets are ordered in the queue by sequence number.
 
 \section{Design}
 For this program it was decided to used fixed burst sizes instead of a moving
 send window. Before the next burst is sent an acknowledgement of the previous
 burst must be received.\\
-Another decision made was to use the built in Java NIO datagram channel since
-Java NIO was already being used.
+Another decision made was to use the Java NIO datagram channel instead of
+the older Java IO.
 
 \section{Compilation and Execution}
 The program contains make and run files.\\\\
-To compile UDP:
+To compile the RUDP application:
 \begin{verbatim}
 	cd src
 	./make.sh
 \end{verbatim}
-To compile TCP:
+To compile the TCP application:
 \begin{verbatim}
 	cd src
 	./maketcp.sh
 \end{verbatim}
-To run UDP sender:
+To run the UDP sender:
 \begin{verbatim}
 	./run.sh send
 \end{verbatim}
-To run UDP receiver:
+To run the UDP receiver:
 \begin{verbatim}
 	./run.sh receive
 \end{verbatim}
-To run TCP sender:
+To run the TCP sender:
 \begin{verbatim}
 	./runtcp.sh send
 \end{verbatim}
-To run TCP receiver:
+To run the TCP receiver:
 \begin{verbatim}
 	./runtcp.sh receive
 \end{verbatim}
 
 \section{Conclusion}
-From the experiments it is clear that TCP is faster by orders of magnitude.
-Although UDP was reliable it seems TCP has more advantages.
+From the experiments it is clear that TCP is faster several by orders of magnitude.
+Although our RUDP application is reliable it seems pure TCP is still more
+efficient.\\\\
 Experimenting with packet sizes shows that larger packets may not necessarily
-speed up the transfer.
+speed up the transfer significantly.
 Experimenting with packet loss shows that losing packets slows the transfer
-rate noticably.\\\\
-The experiments also revealed that the interger used for percentage tracking
+rate noticeably.\\\\
+The experiments also revealed that the integer used for percentage tracking
 should have been a long int.
 
 \pagebreak
