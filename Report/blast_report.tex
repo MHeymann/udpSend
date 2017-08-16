@@ -165,7 +165,39 @@ EOF terminating signal sent which tells receiver to finalise writing of file
 \end{tabular}
 
 \subsection{Different packet sizes in RBUDP}
-buffer size Parameters.java tussen 1 en 50 000
+\begin{tabular}{|cccc|r@.l|r@.l|r@.l|}
+	\hline
+	\multicolumn{4}{|c|}{File size} & \multicolumn{6}{c|}{Time (seconds)}\\
+	\hline
+	\multicolumn{4}{|c|}{(bytes)} &
+	\multicolumn{6}{c|}{Packet size (bytes)}\\
+	\hline
+	& & & & \multicolumn{2}{c|}{5} & \multicolumn{2}{c|}{25} &
+	\multicolumn{2}{c|}{50}\\
+	\hline
+	& & 264 & 228 & 0 & 01 & 0 & 01 & 0 & 01\\
+	\hline
+	& & 368 & 618 & 0 & 01 & 0 & 01 & 0 & 01\\
+	\hline
+	& 3 & 029 & 804 & 0 & 01 & 0 & 01 & 0 & 01\\
+	\hline
+	& 89 & 740 & 009 & 0 & 91 & 0 & 81 & 0 & 41\\
+	\hline
+	& 102 & 802 & 047 & 0 & 91 & 0 & 91 & 0 & 31\\
+	\hline
+	& 140 & 062 & 720 & 1 & 31 & 0 & 41 & 0 & 31\\
+	\hline
+	& 199 & 273 & 479 & 1 & 91 & 1 & 41 & 0 & 61\\
+	\hline
+	& 870 & 701 & 581 & 10 & 81 & 11 & 71 & 8 & 41\\
+	\hline
+	1 & 235 & 459 & 142 & 17 & 11 & 3 & 71 & 22 & 61\\
+	\hline
+	1 & 900 & 032 & 010 & 35 & 51 & 31 & 11 & 31 & 91\\
+	\hline
+	2 & 060 & 362 & 926 & 47 & 01 & 48 & 71 & 40 & 81\\
+	\hline
+\end{tabular}
 
 \subsection{Varying packet loss rates}
 sender deconstructor
@@ -229,6 +261,8 @@ To run TCP receiver:
 \section{Conclusion}
 From the experiments it is clear that TCP is faster by orders of magnitude.
 Although UDP was reliable it seems TCP has more advantages.
+Experimenting with packet sizes shows that larger packets may not necessarily
+speed up the transfer.
 Experimenting with packet loss shows that losing packets slows the transfer
 rate noticably.\\\\
 The experiments also revealed that the interger used for percentage tracking
